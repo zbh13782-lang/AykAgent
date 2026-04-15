@@ -4,8 +4,10 @@ from langchain_core.messages import HumanMessage
 from agent.Agent import build_agent
 from langgraph.checkpoint.memory import MemorySaver
 memory = MemorySaver()
+
 def main():
     agent = build_agent(memory)
+
     while True:
         user_input = input("You> ")
         if user_input.strip() == "exit":
