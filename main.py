@@ -7,7 +7,7 @@ memory = MemorySaver()
 def main():
     agent = build_agent(memory)
     while True:
-        user_input = input("You >")
+        user_input = input("You> ")
         if user_input.strip() == "exit":
             break
         result = agent.invoke(
@@ -15,7 +15,7 @@ def main():
             config={"configurable": {"thread_id": "user1"}}
         )
         ai_message = result["messages"][-1]
-        print(f"AI > {ai_message.content}")
+        print(f"AI> {ai_message.content}")
 
 if __name__ == "__main__":
     main()
