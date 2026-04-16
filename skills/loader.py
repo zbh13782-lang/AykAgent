@@ -106,22 +106,28 @@ def load_skills() -> list[Skill]:
     return skills
 
 
-def get_active_skills(user_input: str | None = None) -> list[Skill]:
-    skills = load_skills()
-    if not user_input:
+def get_active_skills(user_input: str) -> list[Skill]:
+    normalized_input = user_input.strip()
+    if not normalized_input:
         return []
 
-    normalized_input = user_input.casefold()
+    lowered_input = normalized_input.lower()
     active_skills: list[Skill] = []
 
-    for skill in skills:
-        if any(trigger.casefold() in normalized_input for trigger in skill.triggers):
-            active_skills.append(skill)
+    for skill in load_skills():
+        for trigger in skill.triggers:
+            normalized_trigger = trigger.strip()
+            if not normalized_trigger:
+                continue
+
+            if normalized_trigger in normalized_input or normalized_trigger.lower() in lowered_input:
+                active_skills.append(skill)
+                break
 
     return active_skills
 
 
-def build_skills_prompt(user_input: str | None = None) -> str:
+def build_skills_prompt(user_input: str) -> str:
     skills = get_active_skills(user_input)
     if not skills:
         return ""
