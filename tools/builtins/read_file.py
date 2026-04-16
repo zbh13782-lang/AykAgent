@@ -3,7 +3,7 @@ from langchain_core.tools import tool
 from utils.safe_file import safe_path
 
 @tool("read_file")
-def read_file(p:str,limit:int)->str:
+def read_file(p: str, limit: int = 0) -> str:
     """
     读取文件内容，可以指定行数限制，超过部分会被省略。
     Args:

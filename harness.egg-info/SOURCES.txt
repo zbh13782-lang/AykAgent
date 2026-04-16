@@ -1,6 +1,6 @@
 README.md
 pyproject.toml
-agent/graph.py
+agent/Agent.py
 agent/model.py
 agent/prompt.py
 harness.egg-info/PKG-INFO
@@ -8,3 +8,4 @@ harness.egg-info/SOURCES.txt
 harness.egg-info/dependency_links.txt
 harness.egg-info/requires.txt
 harness.egg-info/top_level.txt
+tools/register.py
