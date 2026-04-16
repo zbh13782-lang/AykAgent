@@ -1,13 +1,13 @@
 import asyncio
 
 from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 
 from langgraph.checkpoint.memory import MemorySaver
 
 from agent.model import build_model
-from prompts.prompt import get_system_prompt
+from prompts.prompt import get_skill_prompt, get_system_prompt
 from tools.register import PARENT_TOOLS
 from utils.text import extract_text
 
@@ -28,11 +28,16 @@ async def main():
         if user_input.strip() == "exit":
             break
 
+        skill_prompt = get_skill_prompt(user_input)
+        messages = [HumanMessage(user_input)]
+        if skill_prompt:
+            messages.insert(0, SystemMessage(skill_prompt))
+
         print("AI> ", end="", flush=True)
         printed_anything = False
 
         async for chunk in agent.astream(
-            {"messages": [HumanMessage(user_input)]},
+            {"messages": messages},
             config={"configurable": {"thread_id": "user1"}},
             stream_mode="messages",
         ):
@@ -48,7 +53,7 @@ async def main():
 
         if not printed_anything:
             result = await agent.ainvoke(
-                {"messages": [HumanMessage(user_input)]},
+                {"messages": messages},
                 config={"configurable": {"thread_id": "user1"}},
             )
             ai_message = result["messages"][-1]
