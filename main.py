@@ -26,7 +26,15 @@ async def main():
         name="leader"
     )
     while True:
-        user_input = await asyncio.to_thread(input, "You> ")
+        try:
+            user_input = await asyncio.to_thread(input, "You> ")
+        except EOFError:
+            print("\nDetected EOF on stdin, exiting.")
+            break
+        except KeyboardInterrupt:
+            print("\nInterrupted by user, exiting.")
+            break
+
         if user_input.strip() == "exit":
             break
 
@@ -65,4 +73,7 @@ async def main():
         print()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted by user, exiting.")

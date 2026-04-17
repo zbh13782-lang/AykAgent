@@ -19,4 +19,15 @@ def save_memory(name,description,mem_type,content) -> str:
     mem_manager = get_memory_manager()
     return mem_manager.save_memory(name,description,mem_type,content)
 
-
+@tool("recall_memory")
+def recall_memory(name):
+    """
+    回忆一条记忆，输入记忆的名字，返回这条记忆的内容，如果没有找到这条记忆，返回空
+    Args:
+        name:记忆的名字
+    """
+    mem = mem_manager.memories.get(name)
+    if mem:
+        return mem["content"]
+    else:
+        return ""
