@@ -10,25 +10,28 @@ from agent.model import build_model
 from prompts.prompt import get_skill_prompt, get_system_prompt
 from tools.register import PARENT_TOOLS
 from utils.text import extract_text
+from memory.memory_manager import get_memory_manager
 
-memory = MemorySaver()
+short_memory = MemorySaver()
 
+mem_manager = get_memory_manager()
 
 async def main():
+    mem_manager.load_all()
     agent = create_agent(
         model=build_model(),
-        checkpointer=memory,
+        checkpointer=short_memory,
         system_prompt=get_system_prompt(),
         tools=PARENT_TOOLS,
         name="leader"
     )
-
     while True:
         user_input = await asyncio.to_thread(input, "You> ")
         if user_input.strip() == "exit":
             break
 
         skill_prompt = get_skill_prompt(user_input)
+
         messages = [HumanMessage(user_input)]
         if skill_prompt:
             messages.insert(0, SystemMessage(skill_prompt))

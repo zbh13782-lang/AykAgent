@@ -15,7 +15,7 @@ SUBAGENT_PROMPT = '''
 '''
 
 def get_system_prompt() -> str:
-    return LEADER_AGENT_PROMPT.strip()
+    return LEADER_AGENT_PROMPT.strip() + '\n' + get_memory_prompt()
 
 
 def get_skill_prompt(user_input: str) -> str:

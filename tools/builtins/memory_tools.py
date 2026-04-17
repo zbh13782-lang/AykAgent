@@ -2,7 +2,7 @@ from langchain_core.tools import tool
 
 from memory.memory_manager import get_memory_manager
 
-
+mem_manager = get_memory_manager()
 @tool("save_memory")
 def save_memory(name,description,mem_type,content) -> str:
     """
@@ -16,7 +16,6 @@ def save_memory(name,description,mem_type,content) -> str:
     content:详细的需要记忆的内容
     """
 
-    mem_manager = get_memory_manager()
     return mem_manager.save_memory(name, description, mem_type, content)
 
 

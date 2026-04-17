@@ -140,9 +140,5 @@ class MemoryManager:
             sections.append(f"## [{mem_type}]")
             for name, mem in typed.items():
                 sections.append(f"### {name}: {mem['description']}")
-                if mem["content"].strip():
-                    sections.append(mem["content"].strip())
-                sections.append("")
-
         return "\n".join(sections)
 
