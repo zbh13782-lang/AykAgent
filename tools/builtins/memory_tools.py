@@ -17,6 +17,6 @@ def save_memory(name,description,mem_type,content) -> str:
     """
 
     mem_manager = get_memory_manager()
-    return mem_manager.save_memory(name,description,mem_type)
+    return mem_manager.save_memory(name,description,mem_type,content)
 
 
