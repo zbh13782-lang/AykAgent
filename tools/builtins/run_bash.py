@@ -48,9 +48,13 @@ DANGEROUS_PATTERNS = [
     re.compile(r"\brm\s+-[a-zA-Z]*[rf]"),         # 任意形式的 rm -rf
 ]
 
-# 禁止的 shell 元字符：命令替换、后台执行、命令链接等。
+# 禁止的 shell 元字符：命令替换、后台执行、命令链接、换行（换行在 bash 里等价
+# 于 `;` 作为命令分隔符，但 `shlex.split` 会把换行当空白折叠，容易让下一行的
+# 程序名绕过 BLOCKED_PROGRAMS 检查），等等。
 # 允许管道 `|` 以便常规数据处理（ls | grep ...）。
-FORBIDDEN_SHELL_CHARS = re.compile(r"`|\$\(|\$\{|&&|\|\||(?<!\|);|(?<!&)&(?!$)|<|>>|>")
+FORBIDDEN_SHELL_CHARS = re.compile(
+    r"`|\$\(|\$\{|&&|\|\||(?<!\|);|(?<!&)&|<|>>|>|[\r\n]"
+)
 
 
 def _tokenize_segments(command: str) -> list[list[str]]:
