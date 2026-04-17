@@ -7,7 +7,7 @@ from config import get_settings
 settings = get_settings()
 
 '''
-记忆模块，记忆用户偏好，个人信息，用户明确要记录的东西，用户明确指出的错误类型
+长记忆模块，记忆用户偏好，个人信息，用户明确要记录的东西，用户明确指出的错误类型
 '''
 
 def parse_frontmatter(text: str) -> dict | None:
