@@ -12,9 +12,14 @@ dependencies = [
 	"langchain>=1.2.15",
 	"langchain-community>=0.4.1",
 	"langchain-core>=1.2.28",
-	"langchain-openai>=0.3.17",
+	# 1.1.14 修复 GHSA-r7w7-9xr2-qq2r（图片 token 计数 SSRF / DNS rebinding）
+	"langchain-openai>=1.1.14",
+	# 1.1.2 修复 GHSA-fv5p-p927-qmxr（HTMLHeaderTextSplitter 重定向 SSRF 旁路）
+	"langchain-text-splitters>=1.1.2",
 	"langgraph>=0.2.70",
-	"langsmith>=0.1.147",
+	# 0.7.31 修复 GHSA-rr7j-v2q5-chgv（流式 token 事件绕过输出脱敏）
+	"langsmith>=0.7.31",
+	"pydantic-settings>=2.0.0",
 	"python-dotenv>=1.2.2",
 ]
 
