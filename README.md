@@ -160,7 +160,8 @@ AI> [会自动调用子 Agent 来完成这个复杂任务]
 
 默认情况下短期记忆（LangGraph checkpointer）使用进程内存储，进程退出即丢失。如果希望跨进程 / 多会话保留短期上下文，可以启用 Redis 后端。
 
-仓库根目录提供了 `docker-compose.yml`（`redis:7-alpine` + AOF 持久化 + 健康检查，仅监听 `127.0.0.1`）：
+仓库根目录提供了 `docker-compose.yml`（`redis:8-alpine` + AOF 持久化 + 健康检查，仅监听 `127.0.0.1`）。
+选用 Redis 8 是因为 `langgraph-checkpoint-redis` 依赖 `RedisJSON` / `RediSearch` 模块，Redis 8 官方镜像已内置这些模块，无需再使用 `redis-stack`。
 
 ```bash
 # 1. 在 .env 中设置强密码
