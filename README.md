@@ -156,12 +156,24 @@ AI> [会自动调用子 Agent 来完成这个复杂任务]
 
 - `WORKDIR`: 指定工作目录，文件操作将在此目录下进行
 
-### 短期记忆 / Redis（可选）
+### 短期记忆 / Checkpointer
 
-默认情况下短期记忆（LangGraph checkpointer）使用进程内存储，进程退出即丢失。如果希望跨进程 / 多会话保留短期上下文，可以启用 Redis 后端。
+`main.py` 中的 LangGraph `checkpointer` 通过 `memory/checkpointer.py` 的工厂函数创建，支持两个后端：
 
-仓库根目录提供了 `docker-compose.yml`（`redis:8-alpine` + AOF 持久化 + 健康检查，仅监听 `127.0.0.1`）。
-选用 Redis 8 是因为 `langgraph-checkpoint-redis` 依赖 `RedisJSON` / `RediSearch` 模块，Redis 8 官方镜像已内置这些模块，无需再使用 `redis-stack`。
+| 后端 | `CHECKPOINTER_BACKEND` | 说明 |
+|------|-----------------------|------|
+| 进程内（默认） | `memory` | `langgraph.checkpoint.memory.MemorySaver`，零依赖，进程退出即丢 |
+| Redis | `redis` | `langgraph-checkpoint-redis` 的 `AsyncRedisSaver`，持久化、可设 TTL、多会话 |
+
+相关环境变量（详见 `.env.example`）：
+
+- `CHECKPOINTER_BACKEND`: `memory`（默认）或 `redis`
+- `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` / `REDIS_PASSWORD`：分散配置
+- `REDIS_URL`：完整连接串，若配置则优先于分散变量
+- `SHORT_MEMORY_TTL`: 短期记忆 TTL（秒），默认 `86400`（24 小时），设为 `0` 表示不过期
+- `THREAD_ID`: 可选，显式指定 LangGraph `thread_id`；不设置则每次启动生成 `session-<UUID>`，避免多会话串线。
+
+启动 Redis 请参考仓库根目录的 `docker-compose.yml`（`redis:8-alpine` + AOF 持久化 + 健康检查，仅监听 `127.0.0.1`，自带 ReJSON / RediSearch 模块）：
 
 ```bash
 # 1. 在 .env 中设置强密码
@@ -175,14 +187,8 @@ docker compose ps
 docker compose exec redis redis-cli -a "$REDIS_PASSWORD" ping   # 应返回 PONG
 ```
 
-相关环境变量（见 `.env.example`）：
+> 说明：`langgraph-checkpoint-redis` 依赖 `RedisJSON` + `RediSearch` 模块，因此 docker-compose 使用 Redis 8+ 官方镜像（模块内置），不需要 `redis-stack`。
 
-- `CHECKPOINTER_BACKEND`: `memory`（默认）或 `redis`
-- `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` / `REDIS_PASSWORD`：分散配置
-- `REDIS_URL`：完整连接串，若配置则优先于分散变量
-- `SHORT_MEMORY_TTL`: 短期记忆过期秒数，默认 `86400`（24 小时），设为 `0` 表示不过期
-
-> 注意：当前 `main.py` 仍默认使用内存 checkpointer，代码层接入 Redis 的改动将在后续 PR 中引入；此 PR 只提供基础设施。
 
 ## 🏗️ 技术架构
 
