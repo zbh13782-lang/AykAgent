@@ -156,6 +156,33 @@ AI> [会自动调用子 Agent 来完成这个复杂任务]
 
 - `WORKDIR`: 指定工作目录，文件操作将在此目录下进行
 
+### 短期记忆 / Redis（可选）
+
+默认情况下短期记忆（LangGraph checkpointer）使用进程内存储，进程退出即丢失。如果希望跨进程 / 多会话保留短期上下文，可以启用 Redis 后端。
+
+仓库根目录提供了 `docker-compose.yml`（`redis:7-alpine` + AOF 持久化 + 健康检查，仅监听 `127.0.0.1`）：
+
+```bash
+# 1. 在 .env 中设置强密码
+echo "REDIS_PASSWORD=$(openssl rand -hex 24)" >> .env
+
+# 2. 启动 Redis
+docker compose up -d
+
+# 3. 健康检查
+docker compose ps
+docker compose exec redis redis-cli -a "$REDIS_PASSWORD" ping   # 应返回 PONG
+```
+
+相关环境变量（见 `.env.example`）：
+
+- `CHECKPOINTER_BACKEND`: `memory`（默认）或 `redis`
+- `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` / `REDIS_PASSWORD`：分散配置
+- `REDIS_URL`：完整连接串，若配置则优先于分散变量
+- `SHORT_MEMORY_TTL`: 短期记忆过期秒数，默认 `86400`（24 小时），设为 `0` 表示不过期
+
+> 注意：当前 `main.py` 仍默认使用内存 checkpointer，代码层接入 Redis 的改动将在后续 PR 中引入；此 PR 只提供基础设施。
+
 ## 🏗️ 技术架构
 
 本项目基于以下技术栈构建：
