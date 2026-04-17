@@ -15,19 +15,8 @@ def save_memory(name,description,mem_type,content) -> str:
     mem_type:记忆类型，必须是"user", "feedback", "reference"其中之一，user表示用户的个人信息，feedback表示用户明确指出你的问题或者需要改进的地方，reference表示其他重要的信息或者知识点
     content:详细的需要记忆的内容
     """
-    return mem_manager.save_memory(name,description,mem_type,content)
 
-@tool("recall_memory")
-def recall_memory(name):
-    """
-    回忆一条记忆，输入记忆的名字，返回这条记忆的内容，如果没有找到这条记忆，返回空
-    Args:
-        name:记忆的名字
-    """
-    mem = mem_manager.memories.get(name)
-    if mem:
-        return mem["content"]
-    else:
-        return ""
+    mem_manager = get_memory_manager()
+    return mem_manager.save_memory(name,description,mem_type)
 
 
