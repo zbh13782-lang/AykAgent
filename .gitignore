@@ -66,28 +66,6 @@ dist/
 build/
 *.tsbuildinfo
 
-# Java
-*.class
-*.jar
-*.war
-*.ear
-target/
-*.iml
-.gradle/
-
-# Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-go.work
-
-# Rust
-target/
-Cargo.lock
 
 # 环境变量和配置文件
 .env
@@ -138,3 +116,7 @@ temp/
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+workspace/
+tests/
