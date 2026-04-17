@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+from memory.memory_manager import MemoryManager, get_memory_manager
 from skills import build_skills_prompt
 
 
@@ -19,3 +20,7 @@ def get_system_prompt() -> str:
 
 def get_skill_prompt(user_input: str) -> str:
     return build_skills_prompt(user_input)
+
+def get_memory_prompt() -> str:
+    mem_manager = get_memory_manager()
+    return mem_manager.load_memory_prompt()

@@ -1,3 +1,5 @@
+from __future__ import annotations
+from tools.builtins.memory_tools import *
 from tools.builtins.task import run_subagent
 from tools.builtins.edit_file import edit_file
 from tools.builtins.read_file import read_file
@@ -6,7 +8,7 @@ from tools.builtins.web_search import web_search
 from tools.builtins.write_file import write_file
 from tools.origin.get_weather import get_weather
 
-builtin_tools = [run_bash,read_file,edit_file,write_file,web_search]
+builtin_tools = [run_bash,read_file,edit_file,write_file,web_search,save_memory]
 
 ORIGIN_TOOLS = [get_weather]
 
