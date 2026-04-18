@@ -16,9 +16,25 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
     openai_chat_model: str | None = Field(default_factory=lambda: os.getenv("OPENAI_CHAT_MODEL"))
     openai_base_url: str | None = Field(default_factory=lambda: os.getenv("OPENAI_BASE_URL"))
-
+    #tavily搜索服务
     tavily_api_key: str | None = Field(default_factory=lambda: os.getenv("TAVILY_API_KEY"))
+    #短期记忆方式，可选redis或内存
+    checkpointer: str | None = Field(default_factory=lambda: os.getenv("CHECKPOINTER"))
+    #redis配置
+    redis_url: str | None = Field(default_factory=lambda: os.getenv("REDIS_URL"))
+    redis_host: str = Field(default_factory=lambda: os.getenv("REDIS_HOST", "127.0.0.1"))
+    redis_port: int = Field(default_factory=lambda: int(os.getenv("REDIS_PORT", "6379")))
+    redis_db: int = Field(default_factory=lambda: int(os.getenv("REDIS_DB", "0")))
+    redis_password: str | None = Field(default_factory=lambda: os.getenv("REDIS_PASSWORD"))
+    short_memory_ttl : int | None = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_TTL", "0")))
 
+    thread_id :str | None = Field(default_factory=lambda: int(os.getenv("THREAD_ID", "")))
+    def build_redis_url(self) -> str:
+        """拼装 Redis 连接 URL：显式 REDIS_URL 优先，否则由 host/port/db/password 拼装。"""
+        if self.redis_url:
+            return self.redis_url
+        auth = f":{self.redis_password}@" if self.redis_password else ""
+        return f"redis://{auth}{self.redis_host}:{self.redis_port}/{self.redis_db}"
     #如果 WORKDIR 没配，回退到当前工作目录
     @property
     def resolved_workdir(self) -> Path:
