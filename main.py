@@ -12,15 +12,20 @@ from prompts.prompt import get_skill_prompt, get_system_prompt
 from tools.register import PARENT_TOOLS
 from utils.text import extract_text
 from memory.memory_manager import get_memory_manager
+from memory.short_memory_manager import ShortMemoryManager
 from utils.thread_id import get_thread_id
 
 
 mem_manager = get_memory_manager()
+short_mem_manager = ShortMemoryManager()
 
 async def main():
     mem_manager.load_all()
+    
+    #只有一个用户，这个的作用其实就是新会话
     thread_id = get_thread_id()
     print(f"[session] thread_id: {thread_id}")
+    await short_mem_manager.ainit()
 
     async with make_checkpointer() as short_memory:
 
@@ -44,14 +49,42 @@ async def main():
             if user_input.strip() == "exit":
                 break
 
+            if user_input.strip().lower() == "/compact":
+                compacted = await short_mem_manager.force_compact(
+                    thread_id,
+                    saver=short_memory,
+                    reason="manual-command",
+                )
+                if compacted is None:
+                    print("AI> 当前没有可压缩的新内容（或未启用 Redis 短期记忆）。")
+                else:
+                    print(
+                        "AI> 已完成短期记忆压缩: "
+                        f"[{compacted.compressed_from}, {compacted.compressed_to}) / "
+                        f"total={compacted.total_events}, reason={compacted.reason}"
+                    )
+                continue
+
+            await short_mem_manager.maybe_compact(
+                thread_id,
+                saver=short_memory,
+                reason="auto-before-turn",
+            )
+
             skill_prompt = get_skill_prompt(user_input)
+            summary_prompt = await short_mem_manager.get_summary_prompt(thread_id)
 
             messages = [HumanMessage(user_input)]
+            if summary_prompt:
+                messages.insert(0, SystemMessage(summary_prompt))
             if skill_prompt:
                 messages.insert(0, SystemMessage(skill_prompt))
 
+            await short_mem_manager.append_event(thread_id, "user", user_input)
+
             print("AI> ", end="", flush=True)
             printed_anything = False
+            ai_text_buffer: list[str] = []
 
             async for chunk in agent.astream(
                 {"messages": messages},
@@ -67,6 +100,7 @@ async def main():
                 if text:
                     print(text, end="", flush=True)
                     printed_anything = True
+                    ai_text_buffer.append(text)
 
             if not printed_anything:
                 result = await agent.ainvoke(
@@ -74,12 +108,24 @@ async def main():
                     config={"configurable": {"thread_id": thread_id}},
                 )
                 ai_message = result["messages"][-1]
-                print(extract_text(ai_message.content), end="")
+                ai_text = extract_text(ai_message.content)
+                print(ai_text, end="")
+                ai_text_buffer.append(ai_text)
+
+            await short_mem_manager.append_event(thread_id, "ai", "".join(ai_text_buffer))
+            await short_mem_manager.maybe_compact(
+                thread_id,
+                saver=short_memory,
+                reason="auto-after-turn",
+            )
 
             print()
+
+    await short_mem_manager.aclose()
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nInterrupted by user, exiting.")
+        

@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     redis_db: int = Field(default_factory=lambda: int(os.getenv("REDIS_DB", "0")))
     redis_password: str | None = Field(default_factory=lambda: os.getenv("REDIS_PASSWORD"))
     short_memory_ttl : int | None = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_TTL", "0")))
+    short_memory_compact_turns: int = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_COMPACT_TURNS", "50")))
+    short_memory_compact_chars: int = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_COMPACT_CHARS", "50000")))
+    short_memory_compact_keep_turns: int = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_COMPACT_KEEP_TURNS", "5")))
 
     thread_id :str | None = Field(default_factory=lambda: int(os.getenv("THREAD_ID", "")))
     def build_redis_url(self) -> str:

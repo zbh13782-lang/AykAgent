@@ -1,189 +1,132 @@
-# Ayk 智能助手
+# Harness
 
-一个基于 LangGraph 的多工具智能助手，支持文件操作、命令执行、网络搜索等功能，并具备子任务协作能力。
+一个基于 LangChain 和 LangGraph 的智能 AI 智能体系统，具备记忆管理、工具调用和技能扩展能力。
 
-## ✨ 特性
+## 特性
 
-- 🤖 **智能对话**: 基于 LangGraph 构建的强大 Agent 系统
-- 🛠️ **丰富工具**: 集成文件操作、命令执行、网络搜索等多种实用工具
-- 🔄 **任务协作**: 支持子 Agent 分工协作，处理复杂任务
-- 💾 **记忆功能**: 内置对话记忆，支持上下文连续对话
-- 🌐 **网络搜索**: 集成 Tavily 搜索引擎，获取实时信息
-- 🌤️ **天气查询**: 支持实时天气查询功能
+- 🤖 **智能对话**: 基于 OpenAI GPT 模型的自然语言交互
+- 🧠 **记忆管理**: 支持短期和长期记忆，自动记忆压缩
+- 🛠️ **工具系统**: 可扩展的工具调用能力
+- 📚 **技能系统**: 灵活的技能提示机制
+- 💾 **会话持久化**: 基于 Redis 的检查点机制
+- 🔍 **网络搜索**: 集成 Tavily 搜索 API
 
-## 🚀 快速开始
+## 系统要求
 
-### 环境要求
+- Python 3.10+
+- Redis (可选，用于短期记忆)
 
-- Python >= 3.10
-- uv (推荐) 或 pip
+## 安装
 
-### 安装依赖
-
+1. 克隆仓库：
 ```bash
-# 使用 uv (推荐)
-uv sync
+git clone <repository-url>
 
-# 或使用 pip
-pip install -e .
 ```
 
-### 配置环境变量
-
-创建 `.env` 文件并配置以下环境变量：
-
+2. 创建虚拟环境：
 ```bash
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# 或
+.venv\Scripts\activate  # Windows
+```
+
+3. 安装依赖：
+```bash
+pip install -r requirements.txt
+# 或使用 uv
+uv sync
+```
+
+## 配置
+
+1. 复制环境变量模板：
+```bash
+cp .env.example .env
+```
+
+2. 编辑 `.env` 文件，填入你的 API 密钥：
+```env
 # OpenAI 配置
-OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_CHAT_MODEL=gpt-4o-mini
 OPENAI_BASE_URL=https://api.openai.com/v1
 
-# Tavily 搜索 API (可选，用于网络搜索功能)
-TAVILY_API_KEY=your_tavily_api_key
+# Tavily 搜索 API (可选)
+TAVILY_API_KEY=your_tavily_api_key_here
 
 # 工作目录 (可选)
 WORKDIR=./workspace
+
+# Redis 配置 (可选，可以用docker拉（见docker-compose），也可以直接连接本地)
+CHECKPOINTER=redis
+REDIS_URL=redis://localhost:6379/0
+
+# 短期记忆配置（可选），settings里面已经写好默认
+SHORT_MEMORY_COMPACT_TURNS=50
+SHORT_MEMORY_COMPACT_CHARS=50000
+SHORT_MEMORY_COMPACT_KEEP_TURNS=5
 ```
 
-### 运行
+## 使用方法
 
+启动智能体：
 ```bash
-# 使用 uv
-uv run python main.py
-
-# 或使用 pip
 python main.py
 ```
 
-## 📁 项目结构
+### 交互命令
+
+- 直接输入消息与 AI 对话
+- 输入 `exit` 退出程序
+- 输入 `/compact` 手动触发短期记忆压缩（当前会话）
+
+## 项目结构
 
 ```
-.
-├── agent/              # Agent 相关模块
-│   ├── model.py       # 模型构建
-│   └── Agent.py       # Agent 定义
-├── tools/             # 工具模块
-│   ├── builtins/      # 内置工具
-│   │   ├── task.py    # 子任务工具
-│   │   ├── edit_file.py
-│   │   ├── read_file.py
-│   │   ├── run_bash.py
-│   │   ├── web_search.py
-│   │   └── write_file.py
-│   ├── origin/        # 原始工具
-│   │   └── get_weather.py
-│   └── register.py    # 工具注册
-├── config/            # 配置模块
-│   └── settings.py    # 配置管理
-├── prompts/           # 提示词模块
-│   └── prompt.py      # 系统提示词
-├── utils/             # 工具函数
-│   ├── safe_file.py   # 文件安全操作
-│   └── text.py        # 文本处理
-├── main.py            # 主程序入口
-├── pyproject.toml     # 项目配置
-└── README.md          # 项目说明
+Harness/
+├── agent/          # 智能体核心逻辑
+│   ├── model.py    # 模型构建
+│   └── Agent.py    # 智能体定义
+├── tools/          # 工具系统
+│   ├── register.py # 工具注册
+│   ├── builtins/   # 内置工具
+│   └── mcp/        # MCP 客户端
+├── skills/         # 技能系统
+│   ├── loader.py   # 技能加载器
+│   └── feng-ge/    # 风格技能示例
+├── memory/         # 记忆管理
+│   ├── memory_manager.py      # 长期记忆管理
+│   ├── short_memory_manager.py # 短期记忆管理
+│   └── checkpointer.py        # 检查点管理
+├── prompts/        # 提示词模板
+│   └── prompt.py   # 提示词生成
+├── config/         # 配置文件
+│   └── settings.py # 配置管理
+├── utils/          # 工具函数
+│   ├── text.py     # 文本处理
+│   ├── thread_id.py # 线程ID生成
+│   └── safe_file.py # 安全文件操作
+├── main.py         # 主程序入口
+└── tests/          # 测试文件
 ```
 
-## 🛠️ 可用工具
 
-### 内置工具
+## 依赖项
 
-- **run_bash**: 执行安全的 bash 命令
-- **read_file**: 读取文件内容
-- **write_file**: 写入文件内容
-- **edit_file**: 编辑文件
-- **web_search**: 网络搜索 (需要 Tavily API)
+- langchain >= 1.2.15
+- langchain-community >= 0.4.1
+- langchain-core >= 1.2.28
+- langchain-openai >= 0.3.17
+- langgraph >= 0.2.70
+- langgraph-checkpoint-redis >= 0.4.1
+- langsmith >= 0.1.147
+- python-dotenv >= 1.2.2
+- pydantic >= 2.0.0
+- pydantic-settings >= 2.0.0
 
-### 原始工具
-
-- **get_weather**: 获取天气信息
-
-### 高级功能
-
-- **run_subagent**: 分配任务给子 Agent 处理
-
-## 💡 使用示例
-
-### 基本对话
-
-```
-You> 你好
-AI> 你好！我是 Ayk 智能助手，有什么我可以帮助你的吗？
-```
-
-### 文件操作
-
-```
-You> 创建一个名为 test.txt 的文件，内容是 "Hello World"
-AI> 已成功创建文件 test.txt，内容为 "Hello World"
-```
-
-### 网络搜索
-
-```
-You> 搜索最新的 AI 技术发展
-AI> [搜索结果...]
-```
-
-### 天气查询
-
-```
-You> 查询北京天气
-AI> 北京今天天气晴朗，温度 25°C...
-```
-
-### 复杂任务
-
-```
-You> 帮我分析一下当前目录下的所有 Python 文件
-AI> [会自动调用子 Agent 来完成这个复杂任务]
-```
-
-## 🔧 配置说明
-
-### OpenAI 配置
-
-- `OPENAI_API_KEY`: OpenAI API 密钥
-- `OPENAI_CHAT_MODEL`: 使用的模型名称 (如 gpt-4o-mini, gpt-4 等)
-- `OPENAI_BASE_URL`: API 基础 URL
-
-### Tavily 配置
-
-- `TAVILY_API_KEY`: Tavily 搜索 API 密钥，用于网络搜索功能
-
-### 工作目录
-
-- `WORKDIR`: 指定工作目录，文件操作将在此目录下进行
-
-## 🏗️ 技术架构
-
-本项目基于以下技术栈构建：
-
-- **LangGraph**: 用于构建复杂的 Agent 工作流
-- **LangChain**: 提供核心的 LLM 集成和工具调用功能
-- **OpenAI API**: 提供语言模型能力
-- **Tavily**: 提供网络搜索能力
-
-## 📝 开发计划
-
-- [ ] 添加更多实用工具
-- [ ] 优化错误处理机制
-- [ ] 添加工具调用缓存
-- [ ] 改进用户交互界面
-- [ ] 增加单元测试和集成测试
-- [ ] 支持更多语言模型
-
-## 🤝 贡献
+## 贡献
 
 欢迎提交 Issue 和 Pull Request！
 
-## 📄 许可证
-
-MIT License
-
-## 🙏 致谢
-
-- [LangGraph](https://github.com/langchain-ai/langgraph)
-- [LangChain](https://github.com/langchain-ai/langchain)
-- [Tavily](https://tavily.com/)
