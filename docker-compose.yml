@@ -1,0 +1,30 @@
+services:
+  redis:
+    # Redis 8+ 官方镜像自带 ReJSON / RediSearch 模块（langgraph-checkpoint-redis 依赖）
+    image: redis:8-alpine
+    container_name: aykagent-redis
+    restart: unless-stopped
+    # 仅暴露到宿主机回环，避免公网直连
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    # 通过 REDIS_PASSWORD 开启密码鉴权；同时开启 AOF 持久化
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required, set it in .env}
+      - --appendonly
+      - "yes"
+      - --maxmemory-policy
+      - allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "--no-auth-warning", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  redis-data:
+    driver: local
