@@ -10,6 +10,13 @@ from pydantic_settings import BaseSettings
 
 load_dotenv()
 
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
 class Settings(BaseSettings):
     workdir: str | None = Field(default_factory=lambda: os.getenv("WORKDIR"))
 
@@ -32,6 +39,22 @@ class Settings(BaseSettings):
     short_memory_compact_keep_turns: int = Field(default_factory=lambda: int(os.getenv("SHORT_MEMORY_COMPACT_KEEP_TURNS", "5")))
 
     thread_id :str | None = Field(default_factory=lambda: int(os.getenv("THREAD_ID", "")))
+
+    # MCP 配置（可选）
+    mcp_enable_github: bool = Field(default_factory=lambda: _env_bool("MCP_ENABLE_GITHUB", False))
+    mcp_github_url: str | None = Field(default_factory=lambda: os.getenv("MCP_GITHUB_URL"))
+    mcp_github_token: str | None = Field(default_factory=lambda: os.getenv("MCP_GITHUB_TOKEN"))
+    mcp_github_tool_allowlist: str | None = Field(
+        default_factory=lambda: os.getenv("MCP_GITHUB_TOOL_ALLOWLIST")
+    )
+
+    @property
+    def mcp_github_allowlist(self) -> list[str]:
+        raw = self.mcp_github_tool_allowlist
+        if not raw:
+            return []
+        return [item.strip() for item in raw.split(",") if item.strip()]
+
     def build_redis_url(self) -> str:
         """拼装 Redis 连接 URL：显式 REDIS_URL 优先，否则由 host/port/db/password 拼装。"""
         if self.redis_url:

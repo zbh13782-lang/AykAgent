@@ -7,4 +7,3 @@ web_search = TavilySearchResults(
     api_key=settings.tavily_api_key,
     max_results = 5,
 )
-

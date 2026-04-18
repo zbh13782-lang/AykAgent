@@ -9,7 +9,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from agent.model import build_model
 from memory.checkpointer import make_checkpointer
 from prompts.prompt import get_skill_prompt, get_system_prompt
-from tools.register import PARENT_TOOLS
+from tools.register import get_parent_tools
 from utils.text import extract_text
 from memory.memory_manager import get_memory_manager
 from memory.short_memory_manager import ShortMemoryManager
@@ -28,12 +28,13 @@ async def main():
     await short_mem_manager.ainit()
 
     async with make_checkpointer() as short_memory:
+        parent_tools = await get_parent_tools()
 
         agent = create_agent(
             model=build_model(),
             checkpointer=short_memory,
             system_prompt=get_system_prompt(),
-            tools=PARENT_TOOLS,
+            tools=parent_tools,
             name="leader"
         )
         while True:

@@ -13,6 +13,7 @@ DANGEROUS_COMMANDS = [
     "find / -delete",
     "> /etc/passwd",
     "> /etc/shadow",
+    "say"
 ]
 
 @tool("run_bash")
