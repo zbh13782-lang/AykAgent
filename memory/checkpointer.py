@@ -7,6 +7,7 @@
 
 统一对外暴露为 async context manager，main.py 用 `async with` 即可拿到 saver。
 """
+
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
@@ -26,19 +27,17 @@ async def make_checkpointer() -> AsyncIterator[BaseCheckpointSaver]:
         return
 
     if backend == "redis":
-
         from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 
-        ttl_config : dict | None = None
+        ttl_config: dict | None = None
         if settings.short_memory_ttl and settings.short_memory_ttl > 0:
             ttl_config = {
                 "default_ttl": settings.short_memory_ttl / 60,
-                "refresh_on_read" : True
+                "refresh_on_read": True,
             }
 
         async with AsyncRedisSaver.from_conn_string(
-            settings.build_redis_url(),
-            ttl = ttl_config
+            settings.build_redis_url(), ttl=ttl_config
         ) as saver:
             await saver.asetup()
             yield saver

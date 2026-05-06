@@ -13,8 +13,9 @@ DANGEROUS_COMMANDS = [
     "find / -delete",
     "> /etc/passwd",
     "> /etc/shadow",
-    "say"
+    "say",
 ]
+
 
 @tool("run_bash")
 def run_bash(command: str) -> str:
@@ -31,6 +32,7 @@ def run_bash(command: str) -> str:
 
     try:
         import subprocess
+
         # 超时 100 秒，防止卡死
         result = subprocess.run(
             command,

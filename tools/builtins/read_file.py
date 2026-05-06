@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 
 from utils.safe_file import safe_path
 
+
 @tool("read_file")
 def read_file(p: str, limit: int = 0) -> str:
     """

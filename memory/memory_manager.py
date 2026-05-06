@@ -4,11 +4,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from config import get_settings
+
 settings = get_settings()
 
-'''
+"""
 长记忆模块，记忆用户偏好，个人信息，用户明确要记录的东西，用户明确指出的错误类型
-'''
+"""
+
 
 def parse_frontmatter(text: str) -> dict | None:
     """
@@ -40,10 +42,12 @@ def parse_frontmatter(text: str) -> dict | None:
             result[key.strip()] = value.strip()
     return result
 
-#获取默认的manager方法(路径默认)，只实现一次
+
+# 获取默认的manager方法(路径默认)，只实现一次
 @lru_cache(maxsize=1)
 def get_memory_manager():
     return MemoryManager()
+
 
 class MemoryManager:
     def __init__(self, memory_dir: str | Path | None = None) -> None:
@@ -85,7 +89,9 @@ class MemoryManager:
         self.memory_dir.mkdir(parents=True, exist_ok=True)
         self.memory_index.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    def save_memory(self, name: str, description: str, mem_type: str, content: str) -> str:
+    def save_memory(
+        self, name: str, description: str, mem_type: str, content: str
+    ) -> str:
         """
         新建一个记忆,更新index
         """
@@ -108,7 +114,6 @@ class MemoryManager:
         file_path = self.memory_dir / file_name
         file_path.write_text(frontmatter, encoding="utf-8")
 
-
         self.memories[name] = {
             "description": description,
             "type": mem_type,
@@ -116,7 +121,7 @@ class MemoryManager:
             "file": file_name,
         }
 
-        #更新索引
+        # 更新索引
         self.rebuild_index()
 
         try:
@@ -141,4 +146,3 @@ class MemoryManager:
             for name, mem in typed.items():
                 sections.append(f"### {name}: {mem['description']}")
         return "\n".join(sections)
-

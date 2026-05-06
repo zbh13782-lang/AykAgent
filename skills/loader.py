@@ -54,7 +54,9 @@ def _parse_front_matter(raw_text: str) -> tuple[dict[str, str], str]:
     return parsed, body
 
 
-def _extract_triggers(raw_text: str, metadata: dict[str, str], body: str, skill_dir_name: str) -> tuple[str, ...]:
+def _extract_triggers(
+    raw_text: str, metadata: dict[str, str], body: str, skill_dir_name: str
+) -> tuple[str, ...]:
     candidates: list[str] = []
 
     explicit_triggers = metadata.get("triggers", "").strip()
@@ -120,7 +122,10 @@ def get_active_skills(user_input: str) -> list[Skill]:
             if not normalized_trigger:
                 continue
 
-            if normalized_trigger in normalized_input or normalized_trigger.lower() in lowered_input:
+            if (
+                normalized_trigger in normalized_input
+                or normalized_trigger.lower() in lowered_input
+            ):
                 active_skills.append(skill)
                 break
 

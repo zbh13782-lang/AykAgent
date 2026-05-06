@@ -3,9 +3,6 @@ import asyncio
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage, SystemMessage
 
-
-from langgraph.checkpoint.memory import MemorySaver
-
 from agent.model import build_model
 from memory.checkpointer import make_checkpointer
 from prompts.prompt import get_skill_prompt, get_system_prompt
@@ -19,10 +16,11 @@ from utils.thread_id import get_thread_id
 mem_manager = get_memory_manager()
 short_mem_manager = ShortMemoryManager()
 
+
 async def main():
     mem_manager.load_all()
-    
-    #只有一个用户，这个的作用其实就是新会话
+
+    # 只有一个用户，这个的作用其实就是新会话
     thread_id = get_thread_id()
     print(f"[session] thread_id: {thread_id}")
     await short_mem_manager.ainit()
@@ -35,7 +33,7 @@ async def main():
             checkpointer=short_memory,
             system_prompt=get_system_prompt(),
             tools=parent_tools,
-            name="leader"
+            name="leader",
         )
         while True:
             try:
@@ -113,7 +111,9 @@ async def main():
                 print(ai_text, end="")
                 ai_text_buffer.append(ai_text)
 
-            await short_mem_manager.append_event(thread_id, "ai", "".join(ai_text_buffer))
+            await short_mem_manager.append_event(
+                thread_id, "ai", "".join(ai_text_buffer)
+            )
             await short_mem_manager.maybe_compact(
                 thread_id,
                 saver=short_memory,
@@ -124,9 +124,9 @@ async def main():
 
     await short_mem_manager.aclose()
 
+
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nInterrupted by user, exiting.")
-        

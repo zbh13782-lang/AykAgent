@@ -5,9 +5,10 @@ from langchain_openai import ChatOpenAI
 from config.settings import get_settings
 
 
-#SKILL_PATH = os.path.join(WORKDIR, "skills")
+# SKILL_PATH = os.path.join(WORKDIR, "skills")
 
 settings = get_settings()
+
 
 def build_model() -> ChatOpenAI:
     model_name = settings.openai_chat_model
@@ -22,8 +23,5 @@ def build_model() -> ChatOpenAI:
         raise RuntimeError("❌ OPENAI_BASE_URL 未配置")
 
     return ChatOpenAI(
-        model=model_name,
-        base_url=model_base_url,
-        api_key=api_key,
-        temperature=0
+        model=model_name, base_url=model_base_url, api_key=api_key, temperature=0
     )
